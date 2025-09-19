@@ -47,6 +47,7 @@ fact EstruturaDasEquipes {
 fact ConsistenciaDasVersoes {
     all m: Modulo | m.prontaParaTeste in m.versoes
     all v: Versao | v in v.moduloPai.versoes
+    all v: Versao | one m: Modulo | v in m.versoes
 }
 
 fact RegrasDeTrabalho {
@@ -60,6 +61,12 @@ fact RegrasDeTrabalho {
     // Para todas as duplas de equipes de dev d1 e d2, se d1 for diferente de d2,
     // a interseção dos módulos em que trabalham deve ser vazia.
     all d1, d2: EquipeDev | d1 != d2 => no d1.trabalhaEm & d2.trabalhaEm
+
+    // 4. Módulos em desenvolvimento devem ter pelo menos uma equipe de dev trabalhando neles
+    all m: Modulo | m.estado = EmDesenvolvimento => some dev: EquipeDev | m in dev.trabalhaEm
+
+    // 5. Módulos em teste devem ter a equipe de teste trabalhando neles
+    all m: Modulo | m.estado = EmTestes => some teste: EquipeTeste | m in teste.trabalhaEm
 }
 
 
@@ -76,6 +83,13 @@ assert DesenvolvimentoImplicaEquipeDev {
 }
 
 check DesenvolvimentoImplicaEquipeDev for 5
+
+assert EquipesDevDistintasNaoCompartilhamModulos {
+    all d1, d2: EquipeDev | d1 != d2 => no d1.trabalhaEm & d2.trabalhaEm
+}
+
+check EquipesDevDistintasNaoCompartilhamModulos for 5
+
 
 
 // ========== CENÁRIO DE EXEMPLO PARA VISUALIZAÇÃO ==========
