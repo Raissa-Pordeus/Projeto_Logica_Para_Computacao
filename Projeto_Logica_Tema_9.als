@@ -69,6 +69,8 @@ fact RegrasDeTrabalho {
    all e: Equipe | e.trabalhaEm.estado != Entregue
 }
 
+// ========== CICLO DE VIDA DAS VERSÕES (TRANSICOES) ==========
+
 fact SequenciaEstados {
     EmDesenvolvimento.proximo = EmTestes
     EmTestes.proximo = Integrado
@@ -76,15 +78,8 @@ fact SequenciaEstados {
     Entregue.proximo = none
 }
 
-//run {} for  7 Modulo, 8 Equipe, 15 Versao
-
-// ========== CICLO DE VIDA DAS VERSÕES (TRANSICOES) ==========
-
-
-
-
 // ========== VERIFICAÇÃO DE PROPRIEDADES (ASSERÇÕES) ==========
-/*
+
 // 1. Toda versão pertence a exatamente um módulo
 assert VersaoUnicaPorModulo {
     all v: Versao | one m: Modulo | v in m.versoes 
@@ -128,13 +123,32 @@ assert EquipesDevDistintasNaoCompartilhamModulos {
 }
 check EquipesDevDistintasNaoCompartilhamModulos for 5
 
-// Assert: nenhuma equipe deve trabalhar em módulos entregues
+// 8. Nenhuma equipe deve trabalhar em módulos entregues
 assert NenhumaEquipeEmModuloEntregue {
     all e: Equipe | e.trabalhaEm.estado != Entregue
 }
 
 check NenhumaEquipeEmModuloEntregue for 5
-*/
+
+
+// 9. Todo estado diferente de Entregue deve ter próximo estado definido
+assert TodoEstadoNaoEntregueTemProximo {
+    no s: Estado - Entregue | s.proximo = none
+}
+check TodoEstadoNaoEntregueTemProximo for 5
+
+// 10. Nenhum módulo pode ter estado inválido (ou seja, estado que não está na sequência)
+assert NenhumModuloComEstadoInvalido {
+    no m: Modulo | m.estado not in EmDesenvolvimento + EmTestes + Integrado + Entregue
+}
+check NenhumModuloComEstadoInvalido for 5 but 15 Versao
+
+// 11. Módulos Entregues não devem ter próximo estado
+assert ModulosEntreguesSemProximo {
+    no m: Modulo | m.estado = Entregue and m.estado.proximo != none
+}
+check ModulosEntreguesSemProximo for 5 but 15 Versao
+
 
 // ========== CENÁRIO DE EXEMPLO PARA VISUALIZAÇÃO ==========
 
