@@ -5,8 +5,8 @@
  * Grupo:
  * - Raissa Tainá Pordeus Ferreira (Salatiel)
  * - Ana Larissa Costa dos Santos (Salatiel)
- * - Eduarda Maia (Massoni)
- * - Moisés Barbalho (Massoni)
+ * - Maria Eduarda Ramos Lucena Maia (Massoni)
+ * - Moisés Rodrigues Barbalho Filho (Massoni)
  */
 
 
@@ -67,7 +67,7 @@ fact RegrasDeTrabalho {
    all e: Equipe | e.trabalhaEm.estado != Entregue
 }
 
-//run {} for 10 Modulo, 3 Equipe, 15 Versao
+run {} for 10 Modulo, 3 Equipe, 15 Versao
 
 // ========== CICLO DE VIDA DAS VERSÕES (TRANSICOES) ==========
 
@@ -75,7 +75,7 @@ fact RegrasDeTrabalho {
 
 
 // ========== VERIFICAÇÃO DE PROPRIEDADES (ASSERÇÕES) ==========
-/*
+
 // 1. Toda versão pertence a exatamente um módulo
 assert VersaoUnicaPorModulo {
     all v: Versao | one m: Modulo | v in m.versoes 
@@ -85,7 +85,7 @@ check VersaoUnicaPorModulo for 5
 // 2. Todo módulo tem exatamente uma versão pronta para testes, 
 //    e ela pertence às suas versões
 assert VersaoPronta {
-    all m: Modulo | one m.prontaParaTeste and m.prontaParaTeste in m.versoes
+    all m: Modulo | one m.versaoPronta and m.versaoPronta in m.versoes
 }
 check VersaoPronta for 5
 
@@ -125,7 +125,6 @@ assert NenhumaEquipeEmModuloEntregue {
 }
 
 check NenhumaEquipeEmModuloEntregue for 5
-*/
 
 // ========== CENÁRIO DE EXEMPLO PARA VISUALIZAÇÃO ==========
 
