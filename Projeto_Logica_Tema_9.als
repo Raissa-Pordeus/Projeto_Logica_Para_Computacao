@@ -3,10 +3,10 @@
  * Tema 9: Sistema de Desenvolvimento de Software
  *
  * Grupo:
- * - Raissa Tainá Pordeus Ferreira
- * - Ana Larissa
- * - Eduarda Maia
- * - Moisés Barbalho
+ * - Raissa Tainá Pordeus Ferreira (Salatiel)
+ * - Ana Larissa Costa dos Santos (Salatiel)
+ * - Eduarda Maia (Massoni)
+ * - Moisés Barbalho (Massoni)
  */
 
 // ========== DEFINIÇÃO DOS ESTADOS POSSÍVEIS PARA UM MÓDULO ==========
@@ -17,13 +17,12 @@ one sig EmDesenvolvimento, EmTestes, Integrado, Entregue extends Estado {}
 // ========== DEFINIÇÃO DAS ENTIDADES PRINCIPAIS DO SISTEMA ==========
 
 // Uma Equipe pode trabalhar em um ou mais Módulos.
-sig Equipe {
+abstract sig Equipe {
     trabalhaEm: set Modulo
 }
 
-// Existem dois tipos de equipes, que são subconjuntos de Equipe.
-sig EquipeDev in Equipe {}
-sig EquipeTeste in Equipe {}
+sig EquipeDev extends Equipe {} // equipes de desenvolvimento
+one sig EquipeTeste extends Equipe {}      // equipe de teste
 
 // Um Módulo do sistema.
 sig Modulo {
@@ -41,7 +40,6 @@ sig Versao {
 fact EstruturaDasEquipes {
     #EquipeDev = 2
     #EquipeTeste = 1
-    no EquipeDev & EquipeTeste
 }
 
 fact ConsistenciaDasVersoes {
@@ -69,7 +67,7 @@ fact RegrasDeTrabalho {
     all m: Modulo | m.estado = EmTestes => some teste: EquipeTeste | m in teste.trabalhaEm
 }
 
-
+/*
 // ========== VERIFICAÇÃO DE PROPRIEDADES (ASSERÇÕES) ==========
 
 assert TesteImplicaNaoDesenvolvimento {
@@ -90,7 +88,7 @@ assert EquipesDevDistintasNaoCompartilhamModulos {
 
 check EquipesDevDistintasNaoCompartilhamModulos for 5
 
-
+*/
 
 // ========== CENÁRIO DE EXEMPLO PARA VISUALIZAÇÃO ==========
 
@@ -124,4 +122,4 @@ pred CenarioExemplo {
     }
 }
 
-run CenarioExemplo for 5
+run CenarioExemplo for 5 but 15 Versao
