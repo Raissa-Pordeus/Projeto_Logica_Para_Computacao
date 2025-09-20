@@ -9,31 +9,29 @@
  * - Moisés Barbalho (Massoni)
  */
 
+
+// ========== DEFINIÇÃO DAS ENTIDADES PRINCIPAIS DO SISTEMA ==========
+
+abstract sig Equipe {
+    trabalhaEm: one Modulo // uma equipe pode trabalhar em um Módulo por vez
+}
+sig EquipeDev extends Equipe {}
+one sig EquipeTeste extends Equipe {}
+
+sig Modulo {
+    versoes: some Versao,
+    versaoPronta: one ProntaParaTestes,
+    estado: one Estado
+}
+
+sig Versao {}
+
+sig ProntaParaTestes in Versao {}
+
 // ========== DEFINIÇÃO DOS ESTADOS POSSÍVEIS PARA UM MÓDULO ==========
 
 abstract sig Estado {}
 one sig EmDesenvolvimento, EmTestes, Integrado, Entregue extends Estado {}
-
-// ========== DEFINIÇÃO DAS ENTIDADES PRINCIPAIS DO SISTEMA ==========
-
-// Uma Equipe pode trabalhar em um ou mais Módulos.
-abstract sig Equipe {
-    trabalhaEm: set Modulo
-}
-
-sig EquipeDev extends Equipe {} // equipes de desenvolvimento
-one sig EquipeTeste extends Equipe {}      // equipe de teste
-
-// Um Módulo do sistema.
-sig Modulo {
-    versoes: some Versao,
-    prontaParaTeste: one Versao,
-    estado: one Estado
-}
-sig Versao {
-    moduloPai: one Modulo
-}
-
 
 // ========== FATOS E REGRAS DO SISTEMA ==========
 
@@ -43,8 +41,7 @@ fact EstruturaDasEquipes {
 }
 
 fact ConsistenciaDasVersoes {
-    all m: Modulo | m.prontaParaTeste in m.versoes
-    all v: Versao | v in v.moduloPai.versoes
+    all m: Modulo | m.versaoPronta in m.versoes
     all v: Versao | one m: Modulo | v in m.versoes
 }
 
@@ -65,33 +62,72 @@ fact RegrasDeTrabalho {
 
     // 5. Módulos em teste devem ter a equipe de teste trabalhando neles
     all m: Modulo | m.estado = EmTestes => some teste: EquipeTeste | m in teste.trabalhaEm
+
+  // Nenhuma equipe (dev ou teste) pode trabalhar em módulos entregues
+   all e: Equipe | e.trabalhaEm.estado != Entregue
 }
 
-/*
+//run {} for 10 Modulo, 3 Equipe, 15 Versao
+
+// ========== CICLO DE VIDA DAS VERSÕES (TRANSICOES) ==========
+
+
+
+
 // ========== VERIFICAÇÃO DE PROPRIEDADES (ASSERÇÕES) ==========
-
-assert TesteImplicaNaoDesenvolvimento {
-    all m: Modulo | m.estado = EmTestes => no dev: EquipeDev | m in dev.trabalhaEm
+/*
+// 1. Toda versão pertence a exatamente um módulo
+assert VersaoUnicaPorModulo {
+    all v: Versao | one m: Modulo | v in m.versoes 
 }
+check VersaoUnicaPorModulo for 5
 
-check TesteImplicaNaoDesenvolvimento for 5
+// 2. Todo módulo tem exatamente uma versão pronta para testes, 
+//    e ela pertence às suas versões
+assert VersaoPronta {
+    all m: Modulo | one m.prontaParaTeste and m.prontaParaTeste in m.versoes
+}
+check VersaoPronta for 5
 
+// 3. Equipes de dev só trabalham em módulos em desenvolvimento
+assert DevsSoEmDesenvolvimento {
+    all dev: EquipeDev | dev.trabalhaEm.estado = EmDesenvolvimento
+}
+check DevsSoEmDesenvolvimento for 5
+
+// 4. Todo módulo em desenvolvimento tem pelo menos uma equipe de dev
 assert DesenvolvimentoImplicaEquipeDev {
     all m: Modulo | m.estado = EmDesenvolvimento => some dev: EquipeDev | m in dev.trabalhaEm
 }
-
 check DesenvolvimentoImplicaEquipeDev for 5
 
+// 5. A equipe de teste só trabalha em módulos em testes
+assert TesteSoEmTestes {
+    all t: EquipeTeste | t.trabalhaEm.estado = EmTestes
+}
+check TesteSoEmTestes for 5
+
+// 6. Todo módulo em testes tem a equipe de teste
+assert ModuloEmTestesTemEquipeDeTeste {
+    all m: Modulo | m.estado = EmTestes => some t: EquipeTeste | m in t.trabalhaEm
+}
+check ModuloEmTestesTemEquipeDeTeste for 5
+
+// 7. Duas equipes de desenvolvimento distintas nunca trabalham no mesmo módulo
 assert EquipesDevDistintasNaoCompartilhamModulos {
     all d1, d2: EquipeDev | d1 != d2 => no d1.trabalhaEm & d2.trabalhaEm
 }
-
 check EquipesDevDistintasNaoCompartilhamModulos for 5
 
+// Assert: nenhuma equipe deve trabalhar em módulos entregues
+assert NenhumaEquipeEmModuloEntregue {
+    all e: Equipe | e.trabalhaEm.estado != Entregue
+}
+
+check NenhumaEquipeEmModuloEntregue for 5
 */
 
 // ========== CENÁRIO DE EXEMPLO PARA VISUALIZAÇÃO ==========
-
 
 pred CenarioExemplo {
     some m1, m2, m3, m4: Modulo {
@@ -118,7 +154,6 @@ pred CenarioExemplo {
         }
 
         m4.estado = Entregue
-        no Equipe.trabalhaEm & m4
     }
 }
 
