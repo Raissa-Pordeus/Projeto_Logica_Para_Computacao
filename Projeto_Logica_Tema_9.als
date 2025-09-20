@@ -5,8 +5,8 @@
  * Grupo:
  * - Raissa Tainá Pordeus Ferreira (Salatiel)
  * - Ana Larissa Costa dos Santos (Salatiel)
- * - Eduarda Maia (Massoni)
- * - Moisés Barbalho (Massoni)
+ * - Maria Eduarda Ramos Lucena Maia (Massoni)
+ * - Moisés Rodrigues Barbalho Filho (Massoni)
  */
 
 
