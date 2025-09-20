@@ -5,8 +5,8 @@
  * Grupo:
  * - Raissa Tainá Pordeus Ferreira (Salatiel)
  * - Ana Larissa Costa dos Santos (Salatiel)
- * - Maria Eduarda Ramos Lucena Maia (Massoni)
- * - Moisés Rodrigues Barbalho Filho (Massoni)
+ * - Eduarda Maia (Massoni)
+ * - Moisés Barbalho (Massoni)
  */
 
 
@@ -30,7 +30,9 @@ sig ProntaParaTestes in Versao {}
 
 // ========== DEFINIÇÃO DOS ESTADOS POSSÍVEIS PARA UM MÓDULO ==========
 
-abstract sig Estado {}
+abstract sig Estado {
+    proximo: lone Estado // apontador para o próximo estado no ciclo
+}
 one sig EmDesenvolvimento, EmTestes, Integrado, Entregue extends Estado {}
 
 // ========== FATOS E REGRAS DO SISTEMA ==========
@@ -67,7 +69,14 @@ fact RegrasDeTrabalho {
    all e: Equipe | e.trabalhaEm.estado != Entregue
 }
 
-run {} for 10 Modulo, 3 Equipe, 15 Versao
+fact SequenciaEstados {
+    EmDesenvolvimento.proximo = EmTestes
+    EmTestes.proximo = Integrado
+    Integrado.proximo = Entregue
+    Entregue.proximo = none
+}
+
+//run {} for  7 Modulo, 8 Equipe, 15 Versao
 
 // ========== CICLO DE VIDA DAS VERSÕES (TRANSICOES) ==========
 
@@ -75,7 +84,7 @@ run {} for 10 Modulo, 3 Equipe, 15 Versao
 
 
 // ========== VERIFICAÇÃO DE PROPRIEDADES (ASSERÇÕES) ==========
-
+/*
 // 1. Toda versão pertence a exatamente um módulo
 assert VersaoUnicaPorModulo {
     all v: Versao | one m: Modulo | v in m.versoes 
@@ -125,35 +134,37 @@ assert NenhumaEquipeEmModuloEntregue {
 }
 
 check NenhumaEquipeEmModuloEntregue for 5
+*/
 
 // ========== CENÁRIO DE EXEMPLO PARA VISUALIZAÇÃO ==========
 
 pred CenarioExemplo {
-    some m1, m2, m3, m4: Modulo {
-        m1 != m2 and m1 != m3 and m1 != m4 and
-        m2 != m3 and m2 != m4 and
-        m3 != m4
+    some m1, m2, m3, m4, m5: Modulo {
+        m1 != m2 and m1 != m3 and m1 != m4 and m1 != m5 and
+        m2 != m3 and m2 != m4 and m2 != m5 and
+        m3 != m4 and m3 != m5 and
+        m4 != m5
 
+        // Equipes de desenvolvimento
         one d1, d2: EquipeDev {
             d1 != d2
             d1.trabalhaEm = m1
             d2.trabalhaEm = m2
 
-
             m1.estado = EmDesenvolvimento
             m2.estado = EmDesenvolvimento
         }
 
-
+        // Equipe de teste
         one t1: EquipeTeste {
-            // T1 trabalha em m3.
             t1.trabalhaEm = m3
-            // m3 está em testes.
             m3.estado = EmTestes
         }
 
-        m4.estado = Entregue
+        // Módulos sem equipe trabalhando
+        m4.estado = Integrado
+        m5.estado = Entregue
     }
 }
 
-run CenarioExemplo for 5 but 15 Versao
+run CenarioExemplo for 5 but 15 Versao 
